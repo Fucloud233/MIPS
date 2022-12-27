@@ -6,7 +6,8 @@
 #include <iostream>
 using namespace std;
 
-enum CommandPart{
+enum CommandPart {
+	INVALID = 0x0,
 	OP = 0x20, 
 	RS = 0x10,
 	RT = 0x8,
@@ -21,7 +22,7 @@ enum TranslateMode {
 };
 
 enum CommandType {
-	inValid, R, I, J
+	R, I, J
 };
 
 #define PATH_LEN 7
@@ -29,6 +30,9 @@ enum CommandType {
 #define NAME_LEN 6
 
 #define Long 
+
+
+const int LengthsNum = 6;
 
 class Command
 {
@@ -38,28 +42,43 @@ private:
 
 protected:
 	char Name[NAME_LEN];
+	bool isVaild;
 
 	// 存储可以输入操作数
-	static const int LengthsNum = 6;
 	int PartsNum;
 	CommandPart Parts[LengthsNum];
+
 	int Lengths[LengthsNum];
 	int Codes[LengthsNum];
 
+	// 辅助函数
+	static CommandType char2Type(char type);
+	static CommandPart text2PartType(const string& text);
+	static string partType2text(CommandPart part);
+
+	// 初始化函数 设置指令的类型 和 指令的OP/Func
+	void initial(string name, int command, CommandType type);
 public:
 	Command();
 	//Command(const char* name, int command, const vector<CommandPart>& parts, CommandType type = CommandType::R);
 	Command(const char* name, int command, const CommandPart* parts, int len, CommandType type = CommandType::R);
 	Command(const char* name, int command, const CommandPart* parts, int len, char type = 'R');
+	Command(string name, int command, char type = 'R');
+	Command(string name, int command, CommandType type = CommandType::R);
 
-	static CommandType char2Type(char type);
+	bool setParts(vector<string> parts);
 
 	bool input(int* number, int len);
+	bool input();
 	string output(TranslateMode mode, bool divide = false);
 
 	//string getName() const;
 	string getName() const;
+	string showCommand() const;
 
 	bool isEmpty() const;
+	bool isInvaild() const;
+	
+	//istream operator>>(istream in, string)
 };
 

@@ -74,6 +74,7 @@ bool CommandManager::addCommand(const Command& command) {
 	}
 	else {
 		data.insert({ command.getName(), command });
+		saveData();
 		return true;
 	}
 }
@@ -98,4 +99,21 @@ bool CommandManager::earseCommand(string name) {
 		cerr << "[错误] 指令不存在, 不能删除! " << endl;
 		return false;
 	}
+}
+
+
+vector<string> CommandManager::showAllCommand() {
+	cout << "指令名" << '\t' << "操作数" << endl;
+
+	vector<string> texts;
+	for (auto it = data.begin(); it != data.end(); it++) {
+		texts.push_back(it->second.showCommand());
+	}
+
+	return texts;
+}
+
+
+bool CommandManager::isExist(string name) {
+	
 }

@@ -2,14 +2,51 @@
 #include <string.h>
 #include <cmath>
 #include <algorithm>
+#include <sstream>
+#include <iomanip>
 
 Command::Command() {
 	strcpy_s(Name, "NULL");
 	PartsNum = 0;
+	isVaild = false;
 }
 
 
 Command::Command(const char* name, int command, const CommandPart* parts, int partsNum, CommandType type) {
+	initial(string(name), command, type);
+
+	// 转换为大写
+
+	//for (int i = 0; i < strlen(Name); i++) {
+	//	Name[i] &= 0x8F;
+	//}
+
+	// 记录可以输入块
+	PartsNum = partsNum;
+	for (int i = 0; i < PartsNum; i++) {
+		Parts[i] = parts[i];
+	}
+
+	isVaild = true;
+}
+
+Command::Command(const char* name, int command, const CommandPart* parts, int len, char type)
+	:Command(name, command, parts, len, Command::char2Type(type)) {
+}
+
+Command::Command(string name, int command, char type) {
+	initial(name, command, char2Type(type));
+}
+
+Command::Command(string name, int command, CommandType type) {
+	initial(name, command, type);
+}
+
+
+void Command::initial(string name, int command, CommandType type) {
+	this->PartsNum = 0;
+
+	strcpy_s(Name, name.c_str());
 
 	// 初始化
 	for (int i = 0; i < LengthsNum; i++) {
@@ -24,7 +61,7 @@ Command::Command(const char* name, int command, const CommandPart* parts, int pa
 		}
 
 		// 输入初值
-		Codes[LengthsNum - 1] = command;
+		Codes[0] = command;
 	}
 	// I型指令构造
 	else if (type == I) {
@@ -35,28 +72,11 @@ Command::Command(const char* name, int command, const CommandPart* parts, int pa
 		}
 
 		// 输入初值
-		Codes[0] = command;
+		Codes[LengthsNum - 1] = command;
 	}
 
-	// 转换为大写
-	strcpy_s(Name, name);
-
-	//for (int i = 0; i < strlen(Name); i++) {
-	//	Name[i] &= 0x8F;
-	//}
-
-	// 记录可以输入块
-	PartsNum = partsNum;
-	for (int i = 0; i < PartsNum; i++) {
-		Parts[i] = parts[i];
-	}
+	isVaild = false;
 }
-
-Command::Command(const char* name, int command, const CommandPart* parts, int len, char type)
-	:Command(name, command, parts, len, Command::char2Type(type)) {
-
-}
-
 
 CommandType Command::char2Type(char type) {
 	switch (type) {
@@ -67,7 +87,53 @@ CommandType Command::char2Type(char type) {
 	case 'J':
 		return CommandType::J;
 	default:
-		return CommandType::inValid;
+		return CommandType::R;
+	}
+}
+
+CommandPart Command::text2PartType(const string& text) {
+	if (text == "RS") {
+		return RS;
+	}
+	else if (text == "RT") {
+		return RT;
+	}
+	else if (text == "RS") {
+		return RS;
+	}
+	else if (text == "RT") {
+		return RT;
+	}
+	else if (text == "RD") {
+		return RD;
+	}
+	else if (text == "SHAMT") {
+		return SHAMT;
+	}
+	else if (text == "IMM") {
+		return IMM;
+	}
+	else {
+		return INVALID;
+	}
+}
+
+string Command::partType2text(CommandPart part) {
+	switch (part) {
+	case OP:
+		return "OP";
+	case RS:
+		return "RS";
+	case RT:
+		return "RT";
+	case RD:
+		return "RD";
+	case SHAMT:
+		return "SHAMT";
+	case FUNCT:
+		return "FUNCT";
+	case IMM:
+		return "IMM";
 	}
 }
 
@@ -118,6 +184,22 @@ string Command::toString(TranslateMode mode) {
 	return text;
 }
 
+
+bool Command::setParts(vector<string> parts) {
+	for (int i = 0; i < parts.size();i++) {
+		CommandPart part = text2PartType(parts[i]);
+		if (part == INVALID) {
+			return false;
+		}
+		Parts[i] = part;
+	}
+
+	PartsNum = parts.size();
+	isVaild = true;
+
+	return true;
+}
+
 bool Command::input(int* number, int len) {
 	if (len != PartsNum) {
 		return false;
@@ -127,6 +209,17 @@ bool Command::input(int* number, int len) {
 		int index = (int)log2((int)Parts[i]);
 		Codes[index] = number[i];
 	}
+}
+
+bool Command::input() {
+	int n;
+	for (int i = 0; i < PartsNum; i++) {
+		cin >> n;
+		int index = (int)log2((int)Parts[i]);
+		Codes[index] = n;
+	}
+
+	return true;
 }
 
 string Command::output(TranslateMode mode, bool divide) {
@@ -154,4 +247,20 @@ string Command::getName() const {
 
 bool Command::isEmpty() const {
 	return Name=="NULL" || !PartsNum;
+}
+
+bool Command::isInvaild() const {
+	bool flag = (PartsNum == 0);
+	
+	return flag || isEmpty();
+}
+
+string Command::showCommand() const {
+	string text = Name;
+	text += '\t';
+	for (int i = 0; i < PartsNum; i++) {
+		text += partType2text(Parts[i]) + ' ';
+	}
+
+	return text;
 }

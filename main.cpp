@@ -52,8 +52,8 @@ void AppTest() {
 }
 
 int main() {
-	OperatorTest();
-	//AppTest();
+	//OperatorTest();
+	AppTest();
 
 	system("pause");
 }

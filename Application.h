@@ -2,7 +2,7 @@
 
 #include "CommandManager.h"
 enum OperateType {
-	ADD, ERASE, MODIFY, SHOW, EXIT
+	PROGRAM, ADD, ERASE, MODIFY, SHOW, EXIT
 };
 
 class Application
@@ -14,8 +14,11 @@ private:
 
 
 	void executeOperate(OperateType type);
-	void showaddWindow();
+
+	void showProgramWindow();
+	void showAddWindow();
 	void showMainWindow();
+	void showShowWindow();
 public:
 	void exec();
 };

@@ -30,12 +30,15 @@ public:
 	void loadData();
 
 	// 指令的增删改查
+	vector<string> showAllCommand();
 	bool findCommand(string name) const;
 	bool addCommand(const Command& command);
 	bool modifyCommand(const Command& command);
 	bool earseCommand(string name);
 
 	Command getCommand(string name) const;
+
+	bool isExist(string name);
 
 };
 
