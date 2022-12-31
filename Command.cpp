@@ -45,6 +45,7 @@ Command::Command(string name, int command, CommandType type) {
 
 void Command::initial(string name, int command, CommandType type) {
 	this->PartsNum = 0;
+	this->commandType = type;
 
 	strcpy_s(Name, name.c_str());
 
@@ -88,6 +89,18 @@ CommandType Command::char2Type(char type) {
 		return CommandType::J;
 	default:
 		return CommandType::R;
+	}
+}
+
+
+char Command::type2Char(CommandType type) {
+	switch (type) {
+	case R:
+		return 'R';
+	case I:
+		return 'I';
+	default:
+		return ' ';
 	}
 }
 
@@ -138,6 +151,7 @@ string Command::partType2text(CommandPart part) {
 }
 
 string Command::toString(TranslateMode mode) {
+	// 生成指令对应的而二进制形式
 	unsigned long num = 0;
 	for (int i = LengthsNum -1; i >=1 ; i--) {
 		num += Codes[i];
@@ -224,6 +238,7 @@ bool Command::input() {
 
 string Command::output(TranslateMode mode, bool divide) {
 	int len = 4;
+	// 将指令转换为字符串输出
 	string text = toString(mode);
 
 	if (mode == B && divide) {
@@ -256,11 +271,14 @@ bool Command::isInvaild() const {
 }
 
 string Command::showCommand() const {
-	string text = Name;
-	text += '\t';
+	string text;
 	for (int i = 0; i < PartsNum; i++) {
 		text += partType2text(Parts[i]) + ' ';
 	}
 
 	return text;
+}
+
+char Command::getTypeText() const {
+	return type2Char(commandType);
 }

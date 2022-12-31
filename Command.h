@@ -14,7 +14,7 @@ enum CommandPart {
 	RD = 0x4,
 	SHAMT = 0x2,
 	FUNCT = 0x1,
-	IMM= 0xF
+	IMM= 0x7
 };
 
 enum TranslateMode {
@@ -27,7 +27,7 @@ enum CommandType {
 
 #define PATH_LEN 7
 #define WORD_LENGTH 32
-#define NAME_LEN 6
+#define NAME_LEN 8
 
 #define Long 
 
@@ -42,6 +42,7 @@ private:
 
 protected:
 	char Name[NAME_LEN];
+	CommandType commandType;
 	bool isVaild;
 
 	// 存储可以输入操作数
@@ -53,6 +54,7 @@ protected:
 
 	// 辅助函数
 	static CommandType char2Type(char type);
+	static char type2Char(CommandType type);
 	static CommandPart text2PartType(const string& text);
 	static string partType2text(CommandPart part);
 
@@ -75,6 +77,7 @@ public:
 	//string getName() const;
 	string getName() const;
 	string showCommand() const;
+	char getTypeText() const;
 
 	bool isEmpty() const;
 	bool isInvaild() const;
