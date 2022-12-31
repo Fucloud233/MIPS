@@ -7,8 +7,6 @@
 #include "Command.h"
 using namespace std;
 
-
-
 class CommandManager
 {
 private:
@@ -18,7 +16,6 @@ private:
 
 	map<string, Command> data;
 
-	//map<string, Command> getData();
 public:
 	CommandManager(string fileName = "./Data.dat");
 	~CommandManager();
@@ -32,10 +29,12 @@ public:
 	// 指令的增删改查
 	vector<string> showAllCommand();
 	bool findCommand(string name) const;
-	bool addCommand(const Command& command);
-	bool modifyCommand(const Command& command);
+	bool addCommand(const Command& command, bool add = true);
+	//bool modifyCommand(const Command& command);
 	bool earseCommand(string name);
 
+
+	map<string, Command> getData();
 	Command getCommand(string name) const;
 
 	bool isExist(string name);

@@ -44,13 +44,15 @@ void CommandManager::loadData() {
 		file.read((char*)&command, sizeof(Command));
 		data.insert(pair<string, Command>(command.getName(), command));
 	}
+	
+	data.erase("NULL");
 
 	file.close();
 }
 
-//map<string, Command> CommandManager::getData() {
-//	return data;
-//}
+map<string, Command> CommandManager::getData() {
+	return data;
+}
 
 Command CommandManager::getCommand(string name) const {
 	if (findCommand(name)) {
@@ -67,28 +69,32 @@ bool CommandManager::findCommand(string name) const {
 	return it != data.end();
 }
 
-bool CommandManager::addCommand(const Command& command) {
-	if (findCommand(command.getName())) {
-		cerr << "[错误] 指令已存在, 不能重复添加! " << endl;
-		return false;
+bool CommandManager::addCommand(const Command& command, bool add) {
+	if (add) {
+		if (findCommand(command.getName()) && add) {
+			cerr << "[错误] 指令已存在, 不能重复添加! " << endl;
+			return false;
+		}
 	}
 	else {
-		data.insert({ command.getName(), command });
-		saveData();
-		return true;
+		data.erase(command.getName());
 	}
+
+	data.insert({ command.getName(), command });
+	saveData();
+	return true;
 }
 
-bool CommandManager::modifyCommand(const Command& command) {
-	if (findCommand(command.getName())) {
-		data.insert({ command.getName(), command });
-		return true;
-	}
-	else {
-		cerr << "[错误] 指令不存在, 不能修改! " << endl;
-		return false;
-	}
-}
+//bool CommandManager::modifyCommand(const Command& command) {
+//	if (findCommand(command.getName())) {
+//		data.insert({ command.getName(), command });
+//		return true;
+//	}
+//	else {
+//		cerr << "[错误] 指令不存在, 不能修改! " << endl;
+//		return false;
+//	}
+//}
 
 bool CommandManager::earseCommand(string name) {
 	if (findCommand(name)) {
@@ -115,5 +121,5 @@ vector<string> CommandManager::showAllCommand() {
 
 
 bool CommandManager::isExist(string name) {
-	
+	return data.find(name) != data.end();
 }
