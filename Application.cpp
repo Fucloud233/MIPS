@@ -1,6 +1,7 @@
 #include "Application.h"
 #include <iomanip>
 #include <limits>
+#include <sstream>
 
 int Application::operateNum = 6;
 
@@ -8,6 +9,8 @@ string Application::operateText(OperateType type) {
 	switch (type) {
 	case PROGRAM:
 		return "编写指令";
+	case TRANSLATE:
+		return "编译指令";
 	case ADD:
 		return "添加指令";
 	case ERASE:
@@ -22,8 +25,6 @@ string Application::operateText(OperateType type) {
 }
 
 void Application::showMainWindow() {
-	//cin.ignore();
-	//int len = 15;
 
 	for (int i = 0; i < operateNum; i++) {
 		cout <<' ' << i << ". " << operateText((OperateType)i) << endl;
@@ -45,12 +46,14 @@ void Application::showMainWindow() {
 	}
 }
 
-
 void Application::executeOperate(OperateType type) {
 
 	switch (type) {
 	case PROGRAM:
 		showProgramWindow();
+		break;
+	case TRANSLATE:
+		showTranslateWindow();
 		break;
 	case ADD:
 		showAddWindow();
@@ -76,61 +79,99 @@ void Application::executeOperate(OperateType type) {
 	showMainWindow();
 }
 
-void Application::showProgramWindow() {	
+// TODO: 优化编码界面
+/*
+	添加 导入和导出 指令
+	1. 手动编写
+	2. 导入
+	3. 
+*/
+void Application::showProgramWindow() {
 	cout << "> 请输入你的代码(输入$结束): " << endl;
-
-	string name;
-	vector<string> resultB, resultH;
+	cin.ignore();
+	string code;
+	vector<string> codes;
 	int index = 0;
 	while (true) {
-		// 只有输入的指令合法时 才会继续
-		while (true) {
-			cout << setfill('0') << setw(2) << index << ' ';
-			cin >> name;
-			if (name == "$") {
-				break;
-			}
-			else if(!manager.isExist(name)) {
-
-				continue;
-			}
-
+		// 输入行号
+		cout << setfill('0') << setw(2) << index++ << ' ';
+		
+		// 获取指令
+		getline(cin, code);
+		if (code == "$")
 			break;
-		}
+		codes.push_back(code);
+	}
 
-		if (name == "$") {
-			break;
+	// 保存代码
+	string fileName = "Code.txt";
+	cout << "> 请输入保存文件名(0 不保存): " ; cin >> fileName;
+	if (fileName != "0") {
+		fstream file(fileName, ios::out);
+		for (auto it = codes.begin(); it != codes.end(); it++) {
+			file << *it << endl;
 		}
 		
-
-		Command command = manager.getCommand(name);
-		command.input();
-		resultB.push_back(command.output(B));
-		resultH.push_back(command.output(H));
-
-		index++;
+		file.close();
+		cout << "[Information] 保存成功!" << endl;
 	}
-
-	int format = 0;
-	cout << "> 请输入要编码的格式(二进制: 0/十六进制: 1): ";
-	cin >> format;
-	if (format) {
-		for (int i = 0; i < resultH.size(); i++) {
-			cout << resultH[i]<<' ';
-			if ((i+1) % 8 == 0) {
-				cout << endl;
-			}
-		}
-		cout << endl;
-	}
-	else {
-		for (int i = 0; i < resultB.size(); i++) {
-			cout << resultB[i] << endl;
-		}
-		cout << endl;
-	}
-
 }
+
+//void Application::showProgramWindow() {	
+//	cout << "> 请输入你的代码(输入$结束): " << endl;
+//
+//	string name;
+//	vector<string> resultB, resultH;
+//	int index = 0;
+//	while (true) {
+//		// 只有输入的指令合法时 才会继续
+//		while (true) {
+//			cout << setfill('0') << setw(2) << index << ' ';
+//			cin >> name;
+//			if (name == "$") {
+//				break;
+//			}
+//			else if(!manager.isExist(name)) {
+//
+//				continue;
+//			}
+//
+//			break;
+//		}
+//
+//		if (name == "$") {
+//			break;
+//		}
+//		
+//
+//		Command command = manager.getCommand(name);
+//		command.input();
+//		resultB.push_back(command.output(B));
+//		resultH.push_back(command.output(H));
+//
+//		index++;
+//	}
+//
+//	int format = 0;
+//	cout << "> 请输入要编码的格式(二进制: 0/十六进制: 1): ";
+//	cin >> format;
+//	if (format) {
+//		for (int i = 0; i < resultH.size(); i++) {
+//			cout << resultH[i]<<' ';
+//			if ((i+1) % 8 == 0) {
+//				cout << endl;
+//			}
+//		}
+//		cout << endl;
+//	}
+//	else {
+//		for (int i = 0; i < resultB.size(); i++) {
+//			cout << resultB[i] << endl;
+//		}
+//		cout << endl;
+//	}
+//
+//}
 
 void Application::showAddWindow(bool add) {
 
@@ -243,7 +284,6 @@ void Application::showAddWindow(bool add) {
 	cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
 }
 
-
 void Application::showShowWindow() {
 	const map<string, Command>& texts = manager.getData();
 	int len = 7;
@@ -263,7 +303,6 @@ void Application::showShowWindow() {
 	cout << "┗━━━━━━━━┻━━━━━━━━━━━━━━━┻━━━━━━━━┛" << endl;
 }
 
-
 void Application::showEarseWindow() {
 	string name;
 	cout << "> 请选择要删除的指令名: ";
@@ -275,6 +314,76 @@ void Application::showEarseWindow() {
 	}
 	else {
 		cout << "[Error] 指令不存在, 无法删除" << endl;
+	}
+}
+
+void Application::showTranslateWindow() {
+	string fileName;
+	cout << "> 请输入要编译的文件名: "; cin >> fileName;
+	fstream file(fileName, ios::in);
+	if (!file.is_open()) {
+		cout << "[Error] " << fileName << " 打开失败!" << endl;
+		return;
+	}
+
+	int index = 0;
+	vector<string> result;
+
+	while (!file.eof()) {
+		// 获取指令信息
+		char code[256];
+		file.getline(code, 256);
+		istringstream isstream(code);
+
+		// 判断指令名字是否存在
+		string name;
+		isstream >> name;
+		
+		if (!manager.isExist(name)) {
+			if (name.empty()) {
+				continue;	// 防止空行出现误判
+			}
+
+			cout << "[Error] Row " << index << ": 不存在指令 " << name << '!' << endl;
+			return;
+		}
+
+		Command command = manager.getCommand(name);
+
+		// 获取字段名
+		vector<int> parts(0);
+		while (!isstream.eof()) {
+			int part;
+			isstream >> part;
+			parts.push_back(part);
+		}
+
+		if (!command.input(parts)) {
+			cout << "[Error] Row " << index << ": 操作数数量不对! " << endl;
+			return;
+		}
+
+		result.push_back(command.output());
+
+		index++;
+	}
+
+	cout << "[Information] 编译成功! " << endl;
+
+	// 保存代码
+	cout << "> 请输入保存文件名(0 不保存): "; cin >> fileName;
+	if (fileName != "0") {
+		fstream file(fileName, ios::out);
+		int count = 0;
+		for (auto it = result.begin(); it != result.end(); it++) {
+			file << *it << ' ';
+			if ((count + 1) % 8 == 0) {
+				cout << endl;
+			}
+		}
+
+		file.close();
+		cout << "[Information] 保存成功!" << endl;
 	}
 }
 
