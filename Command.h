@@ -71,13 +71,16 @@ public:
 	bool setParts(vector<string> parts);
 
 	bool input(int* number, int len);
+	bool input(const vector<int>& number);
 	bool input();
-	string output(TranslateMode mode, bool divide = false);
+	string output(TranslateMode mode = H, bool divide = false);
 
 	//string getName() const;
 	string getName() const;
 	string showCommand() const;
 	char getTypeText() const;
+
+	int getPartsNum() const;
 
 	bool isEmpty() const;
 	bool isInvaild() const;

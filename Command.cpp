@@ -215,25 +215,36 @@ bool Command::setParts(vector<string> parts) {
 }
 
 bool Command::input(int* number, int len) {
-	if (len != PartsNum) {
+	return input(vector<int>(number, number + len));
+}
+
+bool Command::input(const vector<int>& number) {
+	if (number.size() != PartsNum) {
 		return false;
 	}
 
 	for (int i = 0; i < PartsNum; i++) {
 		int index = (int)log2((int)Parts[i]);
-		Codes[index] = number[i];
+		// 处理整数和负数
+		if (number[i] >= 0) {
+			Codes[index] = number[i];
+		}
+		else {
+			Codes[index] = (1 << Lengths[index]) + number[i];
+		}
 	}
+	
+	return true;
 }
 
 bool Command::input() {
-	int n;
+	vector<int> num; int n;
 	for (int i = 0; i < PartsNum; i++) {
 		cin >> n;
-		int index = (int)log2((int)Parts[i]);
-		Codes[index] = n;
+		num.push_back(n);
 	}
 
-	return true;
+	return input(num);
 }
 
 string Command::output(TranslateMode mode, bool divide) {
@@ -281,4 +292,8 @@ string Command::showCommand() const {
 
 char Command::getTypeText() const {
 	return type2Char(commandType);
+}
+
+int Command::getPartsNum() const {
+	return PartsNum;
 }
